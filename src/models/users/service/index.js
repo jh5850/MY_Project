@@ -1,7 +1,7 @@
 import database from "../../../database";
 
 export class UserService {
-  //findById, findMany, create, update, delete
+  //findById, findMany, create, update, delete////
 
   async checkUserByloginID(loginID) {
     const user = await database.user.findUnique({
