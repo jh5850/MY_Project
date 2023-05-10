@@ -1,0 +1,157 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User{
+  id String @id @default(uuid()) 
+
+  loginID String @db.VarChar(100) @unique
+  password String @db.VarChar(100)
+  nickname String @db.Char(30)
+  name String @db.Char(30)
+  phonenum String @db.Char(11)
+  selfIntroduce String @db.LongText
+  birthday String @db.Char(10)
+  address String @db.Char(60)
+  employeeReviews EmployeeReview[]
+  userImages UserImage[]
+  tasks Task[]
+  notificationKeywords NotificationKeyword[]
+  taskNotifications TaskNotification[]
+  chattingMessages ChattingMessage[]
+  chattingRooms ChattingRoom[]
+  todoWorks TodoWork[]
+}
+
+model UserImage{
+  id String @id @default(uuid()) 
+
+  url String @db.VarChar(300)
+  // User와 1대다
+  userId String //FK
+  user User @relation( fields: [ userId], references: [ id])
+}
+
+model EmployeeReview{
+  id String @id @default(uuid()) 
+
+  title String @db.VarChar(90) 
+  content String @db.LongText
+// 회원과 알바와 1대다
+  userId String //foreign key
+  user User @relation( fields: [ userId], references: [ id])
+  taskId String //FK
+  task Task @relation( fields: [ taskId], references: [ id])
+  reviewChecklist ReviewChecklist?
+}
+
+model ReviewChecklist{
+id String @id @default(uuid())
+
+GoodAtWork Boolean
+GoodManner Boolean
+GoodPromise Boolean
+GoodCommunicate Boolean
+WantToWorkAgain Boolean
+//EmployeeReview와 1대1
+employeeReviewId String @unique //FK
+employeeReview EmployeeReview @relation( fields: [ employeeReviewId], references: [ id])
+}
+
+model TaskCategory{
+id String @id @default(uuid()) 
+
+category String @db.VarChar(30)
+tasks Task[]
+}
+
+model Task{
+id String @id @default(uuid()) 
+
+title String @db.VarChar(150)
+time String @db.Char(40)
+cost Int
+description String @db.LongText
+detailAddress String @db.VarChar(300)
+isFinished Boolean
+createdAt DateTime @default(now())
+TaskEmployee String? @db.VarChar(100)
+address String @db.Char(60)
+//유저와 다대1,카테고리와 1대다
+userId String //FK
+user User @relation( fields: [ userId], references: [ id])
+taskCategoryId String //FK
+taskCategory TaskCategory @relation( fields: [ taskCategoryId], references: [ id])
+employeeReviews EmployeeReview[]
+taskImages TaskImage[]
+chattingRooms ChattingRoom[]
+todoWorks TodoWork[]
+}
+
+model NotificationKeyword{
+id String @id @default(uuid())
+
+keyword String @db.VarChar(30)
+//회원과 1대다
+userId String//FK
+user User @relation( fields: [ userId], references: [ id])
+}
+
+model TaskNotification{
+id String @id @default(uuid())
+
+content String @db.LongText
+createdAt DateTime @default(now())
+//회원과 1대다
+userId String//FK
+user User @relation( fields: [ userId], references: [ id])
+}
+
+model TodoWork{
+userId String
+user User @relation( fields: [ userId], references: [ id])
+taskId String
+task Task @relation( fields: [ taskId], references: [ id])
+
+@@id([userId, taskId])
+}
+
+model ChattingMessage{
+id String @id @default(uuid())
+
+content String @db.LongText
+createdAt DateTime @default(now())
+// 회원과 1대다, 채팅방과 1대다
+userId String//FK
+user User @relation( fields: [ userId], references: [ id])
+chattingRoomId String//FK
+chattingRoom ChattingRoom @relation( fields: [ chattingRoomId], references: [ id])
+}
+
+model ChattingRoom{
+id String @id @default(uuid())
+
+//알바와 1대다
+// 회원과 1대다
+userId String//FK
+user User @relation( fields: [ userId], references: [ id])
+taskId String//FK
+task Task @relation( fields: [ taskId], references: [ id])
+chattingMessages ChattingMessage[]
+}
+
+model TaskImage{
+id String @id @default(uuid()) 
+
+url String @db.VarChar(300)
+// Task와 1대 다
+taskId String//FK
+task Task @relation( fields: [ taskId], references: [ id])
+}
